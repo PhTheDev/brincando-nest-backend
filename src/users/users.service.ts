@@ -23,10 +23,29 @@ export class UsersService {
     });
   }
 
-  findAll() {
-    return this.prisma.user.findMany({
-      orderBy: { id: 'asc' },
-    });
+  async findAll(page = 1, limit = 10) {
+    const safePage = Math.max(1, page)
+    const safeLimit = Math.min(100, Math.max(1, limit))
+    const skip = (safePage - 1) * safeLimit
+  
+    const [data, total] = await this.prisma.$transaction([
+      this.prisma.user.findMany({
+        skip,
+        take: safeLimit,
+        orderBy: { id: 'asc' },
+      }),
+      this.prisma.user.count(),
+    ])
+  
+    return {
+      data,
+      meta: {
+        page: safePage,
+        limit: safeLimit,
+        total,
+        totalPages: Math.ceil(total / safeLimit),
+      },
+    }
   }
 
   async findOne(id: number) {

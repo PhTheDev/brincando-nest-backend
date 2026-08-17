@@ -9,6 +9,7 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -18,7 +19,7 @@ import { UsersService } from './users.service';
  * Controller ≈ urls.py + views do Django.
  * @Controller('users') → prefixo /users (como path('users/', ...)).
  */
-@Controller('users')
+@Controller('/api/v1/users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
@@ -28,8 +29,11 @@ export class UsersController {
   }
 
   @Get()
-  findAll() {
-    return this.usersService.findAll();
+  findAll(
+    @Query('oage') page = '1',
+    @Query('limit') limit = '10',
+  ) {
+    return this.usersService.findAll(+page, +limit);
   }
 
   @Get(':id')
