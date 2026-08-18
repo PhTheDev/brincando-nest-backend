@@ -8,7 +8,7 @@ describe('UsersService', () => {
   let service: UsersService;
   const prisma = {
     $transaction: jest.fn((ops: Promise<unknown>[]) => Promise.all(ops)),
-    user: {
+    usuario: {
       create: jest.fn(),
       findMany: jest.fn(),
       findUnique: jest.fn(),
@@ -31,11 +31,11 @@ describe('UsersService', () => {
   });
 
   it('creates a user', async () => {
-    const dto = { email: 'a@b.com', name: 'Ada' };
-    prisma.user.create.mockResolvedValue({ id: 1, ...dto });
+    const dto = { email: 'a@b.com', nome: 'Ada', senha: 'Str0ng!Pass' };
+    prisma.usuario.create.mockResolvedValue({ id: 1, ...dto });
 
     await expect(service.create(dto)).resolves.toEqual({ id: 1, ...dto });
-    expect(prisma.user.create).toHaveBeenCalledWith({ data: dto });
+    expect(prisma.usuario.create).toHaveBeenCalledWith({ data: dto });
   });
 
   it('throws ConflictException on duplicate email', async () => {
@@ -43,23 +43,23 @@ describe('UsersService', () => {
       code: 'P2002',
       clientVersion: 'test',
     });
-    prisma.user.create.mockRejectedValue(error);
+    prisma.usuario.create.mockRejectedValue(error);
 
     await expect(
-      service.create({ email: 'a@b.com' }),
+      service.create({ email: 'a@b.com', nome: 'teste', senha: 'Str0ng!Pass' }),
     ).rejects.toBeInstanceOf(ConflictException);
   });
 
   it('throws NotFoundException when user is missing', async () => {
-    prisma.user.findUnique.mockResolvedValue(null);
+    prisma.usuario.findUnique.mockResolvedValue(null);
 
     await expect(service.findOne(99)).rejects.toBeInstanceOf(NotFoundException);
   });
 
   it('returns paginated users', async () => {
-    const users = [{ id: 1, email: 'a@b.com', name: 'Ada' }];
-    prisma.user.findMany.mockResolvedValue(users);
-    prisma.user.count.mockResolvedValue(1);
+    const users = [{ id: 1, email: 'a@b.com', nome: 'Ada' }];
+    prisma.usuario.findMany.mockResolvedValue(users);
+    prisma.usuario.count.mockResolvedValue(1);
 
     await expect(
       service.findAll({ page: 1, limit: 10 }),

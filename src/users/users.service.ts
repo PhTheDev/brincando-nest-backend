@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import { PaginatedResponse } from '../common/types/paginated-response';
-import { Prisma, User } from '../generated/prisma/client';
+import { Prisma, Usuario } from '../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -15,7 +15,7 @@ export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
 
   create(dto: CreateUserDto) {
-    return this.prisma.user.create({ data: dto }).catch((error) => {
+    return this.prisma.usuario.create({ data: dto }).catch((error) => {
       this.rethrowUniqueEmail(error);
       throw error;
     });
@@ -23,17 +23,17 @@ export class UsersService {
 
   async findAll(
     query: PaginationQueryDto,
-  ): Promise<PaginatedResponse<User>> {
+  ): Promise<PaginatedResponse<Usuario>> {
     const { page, limit } = query;
     const skip = (page - 1) * limit;
 
     const [data, total] = await this.prisma.$transaction([
-      this.prisma.user.findMany({
+      this.prisma.usuario.findMany({
         skip,
         take: limit,
         orderBy: { id: 'asc' },
       }),
-      this.prisma.user.count(),
+      this.prisma.usuario.count(),
     ]);
 
     return {
@@ -48,16 +48,16 @@ export class UsersService {
   }
 
   async findOne(id: number) {
-    const user = await this.prisma.user.findUnique({ where: { id } });
+    const user = await this.prisma.usuario.findUnique({ where: { id } });
     if (!user) {
-      throw new NotFoundException(`User #${id} not found`);
+      throw new NotFoundException(`Usuario #${id} não encontrado!`);
     }
     return user;
   }
 
   async update(id: number, dto: UpdateUserDto) {
     await this.findOne(id);
-    return this.prisma.user
+    return this.prisma.usuario
       .update({
         where: { id },
         data: dto,
@@ -70,7 +70,7 @@ export class UsersService {
 
   async remove(id: number) {
     await this.findOne(id);
-    return this.prisma.user.delete({ where: { id } });
+    return this.prisma.usuario.delete({ where: { id } });
   }
 
   private rethrowUniqueEmail(error: unknown): void {

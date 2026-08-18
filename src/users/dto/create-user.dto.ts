@@ -1,4 +1,10 @@
-import { IsEmail, IsOptional, IsString, MinLength } from 'class-validator';
+import {
+  IsEmail,
+  IsOptional,
+  IsString,
+  IsStrongPassword,
+  MinLength,
+} from 'class-validator';
 
 /** Equivalente a um Serializer/Form do Django para criação. */
 export class CreateUserDto {
@@ -8,5 +14,8 @@ export class CreateUserDto {
   @IsOptional()
   @IsString()
   @MinLength(1)
-  name?: string;
+  nome?: string;
+
+  @IsStrongPassword()
+  senha!: string;
 }
