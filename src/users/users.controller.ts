@@ -11,15 +11,12 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
+import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersService } from './users.service';
 
-/**
- * Controller ≈ urls.py + views do Django.
- * @Controller('users') → prefixo /users (como path('users/', ...)).
- */
-@Controller('/api/v1/users')
+@Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
@@ -29,11 +26,8 @@ export class UsersController {
   }
 
   @Get()
-  findAll(
-    @Query('oage') page = '1',
-    @Query('limit') limit = '10',
-  ) {
-    return this.usersService.findAll(+page, +limit);
+  findAll(@Query() query: PaginationQueryDto) {
+    return this.usersService.findAll(query);
   }
 
   @Get(':id')

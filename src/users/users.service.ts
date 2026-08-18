@@ -3,15 +3,13 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Prisma } from '../generated/prisma/client';
+import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
+import { PaginatedResponse } from '../common/types/paginated-response';
+import { Prisma, User } from '../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 
-/**
- * Service = camada de negócio (como um service/manager no Django).
- * Controller só recebe HTTP; aqui vive a lógica e o acesso ao banco.
- */
 @Injectable()
 export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
@@ -23,29 +21,30 @@ export class UsersService {
     });
   }
 
-  async findAll(page = 1, limit = 10) {
-    const safePage = Math.max(1, page)
-    const safeLimit = Math.min(100, Math.max(1, limit))
-    const skip = (safePage - 1) * safeLimit
-  
+  async findAll(
+    query: PaginationQueryDto,
+  ): Promise<PaginatedResponse<User>> {
+    const { page, limit } = query;
+    const skip = (page - 1) * limit;
+
     const [data, total] = await this.prisma.$transaction([
       this.prisma.user.findMany({
         skip,
-        take: safeLimit,
+        take: limit,
         orderBy: { id: 'asc' },
       }),
       this.prisma.user.count(),
-    ])
-  
+    ]);
+
     return {
       data,
       meta: {
-        page: safePage,
-        limit: safeLimit,
+        page,
+        limit,
         total,
-        totalPages: Math.ceil(total / safeLimit),
+        totalPages: Math.ceil(total / limit) || 0,
       },
-    }
+    };
   }
 
   async findOne(id: number) {

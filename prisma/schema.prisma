@@ -1,5 +1,5 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// Schema principal: só infra (datasource + generator).
+// Models por domínio ficam em prisma/models/.
 
 datasource db {
   provider = "sqlite"
@@ -9,20 +9,4 @@ generator client {
   provider     = "prisma-client"
   output       = "../src/generated/prisma"
   moduleFormat = "cjs"
-}
-
-model User {
-  id    Int     @id @default(autoincrement())
-  email String  @unique
-  name  String?
-  posts Post[]
-}
-
-model Post {
-  id        Int      @id @default(autoincrement())
-  title     String
-  content   String?
-  published Boolean? @default(false)
-  author    User?    @relation(fields: [authorId], references: [id])
-  authorId  Int?
 }

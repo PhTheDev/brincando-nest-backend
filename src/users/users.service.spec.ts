@@ -7,12 +7,14 @@ import { Prisma } from '../generated/prisma/client';
 describe('UsersService', () => {
   let service: UsersService;
   const prisma = {
+    $transaction: jest.fn((ops: Promise<unknown>[]) => Promise.all(ops)),
     user: {
       create: jest.fn(),
       findMany: jest.fn(),
       findUnique: jest.fn(),
       update: jest.fn(),
       delete: jest.fn(),
+      count: jest.fn(),
     },
   };
 
@@ -52,5 +54,18 @@ describe('UsersService', () => {
     prisma.user.findUnique.mockResolvedValue(null);
 
     await expect(service.findOne(99)).rejects.toBeInstanceOf(NotFoundException);
+  });
+
+  it('returns paginated users', async () => {
+    const users = [{ id: 1, email: 'a@b.com', name: 'Ada' }];
+    prisma.user.findMany.mockResolvedValue(users);
+    prisma.user.count.mockResolvedValue(1);
+
+    await expect(
+      service.findAll({ page: 1, limit: 10 }),
+    ).resolves.toEqual({
+      data: users,
+      meta: { page: 1, limit: 10, total: 1, totalPages: 1 },
+    });
   });
 });
