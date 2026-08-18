@@ -3,7 +3,7 @@ model Plano {
   nome         String
   descricao    String
   preco        Decimal
-  ducacaoMeses Int
+  duracaoMeses Int
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }
