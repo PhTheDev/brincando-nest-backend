@@ -54,11 +54,11 @@ export class CategoriasService {
       .update({
         where: {id},
         data: updateCategoriaDto,
-      })
+      });
   }
 
   async remove(id: number) {
     await this.findOne(id);
-    return this.prisma.categoria.delete({where: { id }})
+    return this.prisma.categoria.delete({where: { id }});
   }
 }

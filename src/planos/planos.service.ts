@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreatePlanoDto } from './dto/create-plano.dto';
 import { UpdatePlanoDto } from './dto/update-plano.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -14,19 +14,49 @@ export class PlanosService {
     return this.prisma.plano.create({ data: createPlanoDto })
   }
 
-  findAll(query: PaginationQueryDto): Promise<PaginatedResponse<Plano>> {
-    return `This action returns all planos`;
+  async findAll(query: PaginationQueryDto): Promise<PaginatedResponse<Plano>> {
+    const {page, limit} = query
+    const skip = (page - 1) * limit
+
+    const [data, total] = await this.prisma.$transaction([
+      this.prisma.plano.findMany({
+        skip,
+        take: limit,
+        orderBy: {id: 'asc'}
+      }),
+      this.prisma.plano.count(),
+    ]);
+
+    return {
+      data,
+      meta: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit) || 0,
+      },
+    };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} plano`;
+  async findOne(id: number) {
+    const plano = await this.prisma.plano.findUnique({where: { id }})
+    if (!plano) {
+      throw new NotFoundException(`Plano #${id} não encontrado!`)
+    }
+    return plano
   }
 
-  update(id: number, updatePlanoDto: UpdatePlanoDto) {
-    return `This action updates a #${id} plano`;
+  async update(id: number, updatePlanoDto: UpdatePlanoDto) {
+    await this.findOne(id)
+    return this.prisma.plano
+      .update({
+        where: { id },
+        data: updatePlanoDto,
+      });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} plano`;
+  async remove(id: number) {
+    await this.findOne(id)
+    return this.prisma.plano.delete({where: { id }});
   }
 }
