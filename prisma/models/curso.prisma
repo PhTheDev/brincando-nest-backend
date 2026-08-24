@@ -4,10 +4,16 @@ model Curso {
   descricao      String
   idInstrutor    Int
   idCategoria    Int
-  nivel          Int
+  nivel          Nivel
   dataPublicacao DateTime
   totalHoras     Int
   preco          Decimal
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
+}
+
+enum Nivel {
+  INICIANTE
+  INTERMEDIARIO
+  AVANCADO
 }

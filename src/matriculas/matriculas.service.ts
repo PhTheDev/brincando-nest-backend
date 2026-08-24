@@ -1,26 +1,61 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateMatriculaDto } from './dto/create-matricula.dto';
 import { UpdateMatriculaDto } from './dto/update-matricula.dto';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 
 @Injectable()
 export class MatriculasService {
+  constructor(private readonly prisma: PrismaService) {}
+
   create(createMatriculaDto: CreateMatriculaDto) {
-    return 'This action adds a new matricula';
+    return this.prisma.matricula.create({ data: createMatriculaDto });
   }
 
-  findAll() {
-    return `This action returns all matriculas`;
+  async findAll(query: PaginationQueryDto) {
+    const {page, limit} = query
+    const skip = (page - 1) * limit
+
+    const [data, total] = await this.prisma.$transaction([
+      this.prisma.matricula.findMany({
+        skip,
+        take: limit,
+        orderBy: { id: 'asc'}
+      }),
+      this.prisma.matricula.count()
+    ])
+
+    return {
+      data,
+      meta: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit) || 0,
+      }
+    }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} matricula`;
+  async findOne(id: number) {
+    const matricula = await this.prisma.matricula.findUnique({ where: { id } })
+    if (!matricula) {
+      throw new NotFoundException(`Matricula #${id} não encontrado!`)
+    }
+    return matricula;
   }
 
-  update(id: number, updateMatriculaDto: UpdateMatriculaDto) {
-    return `This action updates a #${id} matricula`;
+  async update(id: number, updateMatriculaDto: UpdateMatriculaDto) {
+    await this.findOne(id)
+    return this.prisma.curso
+      .update({
+        where: { id },
+        data: updateMatriculaDto
+      });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} matricula`;
+  async remove(id: number) {
+    await this.findOne(id)
+    return this.prisma.curso
+      .delete({where: { id }});
   }
 }

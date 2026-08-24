@@ -6,4 +6,5 @@ model Assinatura {
   dataFim    DateTime?
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
+  
 }

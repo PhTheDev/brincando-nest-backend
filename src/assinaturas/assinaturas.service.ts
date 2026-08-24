@@ -1,26 +1,62 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateAssinaturaDto } from './dto/create-assinatura.dto';
 import { UpdateAssinaturaDto } from './dto/update-assinatura.dto';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
+import { NotFoundError } from 'rxjs';
 
 @Injectable()
 export class AssinaturasService {
+  constructor(private readonly prisma: PrismaService) {}
+
   create(createAssinaturaDto: CreateAssinaturaDto) {
-    return 'This action adds a new assinatura';
+    return this.prisma.assinatura.create({ data: createAssinaturaDto })
   }
 
-  findAll() {
-    return `This action returns all assinaturas`;
+  async findAll(query: PaginationQueryDto) {
+    const {page, limit} = query
+    const skip = (page - 1) * limit
+
+    const [data, total] = await this.prisma.$transaction([
+      this.prisma.assinatura.findMany({
+        skip,
+        take: limit,
+        orderBy: { id: 'asc' }
+      }),
+      this.prisma.assinatura.count()
+    ])
+
+    return {
+      data,
+      meta: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit) || 0
+      }
+    }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} assinatura`;
+  async findOne(id: number) {
+    const assinatura = await this.prisma.assinatura.findUnique({ where: { id }})
+    if (!assinatura) {
+      throw new NotFoundException(`Assinatura #${ id } não encontrada!`)
+    }
+    return assinatura;
   }
 
-  update(id: number, updateAssinaturaDto: UpdateAssinaturaDto) {
-    return `This action updates a #${id} assinatura`;
+  async update(id: number, updateAssinaturaDto: UpdateAssinaturaDto) {
+    await this.findOne(id)
+    return this.prisma.assinatura
+      .update({
+        where: { id },
+        data: updateAssinaturaDto
+      });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} assinatura`;
+  async remove(id: number) {
+    await this.findOne(id)
+    return this.prisma.assinatura
+      .delete({ where: { id }});
   }
 }
