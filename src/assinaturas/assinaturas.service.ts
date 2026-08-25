@@ -3,7 +3,6 @@ import { CreateAssinaturaDto } from './dto/create-assinatura.dto';
 import { UpdateAssinaturaDto } from './dto/update-assinatura.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
-import { NotFoundError } from 'rxjs';
 
 @Injectable()
 export class AssinaturasService {

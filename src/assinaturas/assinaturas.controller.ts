@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, ParseIntPipe } from '@nestjs/common';
 import { AssinaturasService } from './assinaturas.service';
 import { CreateAssinaturaDto } from './dto/create-assinatura.dto';
 import { UpdateAssinaturaDto } from './dto/update-assinatura.dto';
+import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 
 @Controller('assinaturas')
 export class AssinaturasController {
@@ -13,22 +14,22 @@ export class AssinaturasController {
   }
 
   @Get()
-  findAll() {
-    return this.assinaturasService.findAll();
+  findAll(@Query() query: PaginationQueryDto) {
+    return this.assinaturasService.findAll(query);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.assinaturasService.findOne(+id);
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.assinaturasService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAssinaturaDto: UpdateAssinaturaDto) {
-    return this.assinaturasService.update(+id, updateAssinaturaDto);
+  update(@Param('id', ParseIntPipe) id: number, @Body() updateAssinaturaDto: UpdateAssinaturaDto) {
+    return this.assinaturasService.update(id, updateAssinaturaDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.assinaturasService.remove(+id);
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.assinaturasService.remove(id);
   }
 }

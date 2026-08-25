@@ -1,26 +1,61 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateCertificadoDto } from './dto/create-certificado.dto';
 import { UpdateCertificadoDto } from './dto/update-certificado.dto';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 
 @Injectable()
 export class CertificadosService {
+  constructor(private readonly prisma: PrismaService) {}
+
   create(createCertificadoDto: CreateCertificadoDto) {
-    return 'This action adds a new certificado';
+    return this.prisma.certificado.create({ data: createCertificadoDto })
   }
 
-  findAll() {
-    return `This action returns all certificados`;
+  async findAll(query: PaginationQueryDto) {
+    const {page, limit} = query
+    const skip = (page - 1) * limit
+
+    const [data, total] = await this.prisma.$transaction([
+      this.prisma.certificado.findMany({
+        skip,
+        take: limit,
+        orderBy: { id: 'asc'}
+      }),
+      this.prisma.certificado.count()
+    ])
+
+    return {
+      data,
+      meta: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit) || 0,
+      }
+    }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} certificado`;
+  async findOne(id: number) {
+    const certificado = await this.prisma.certificado.findUnique({ where: { id } })
+    if (!certificado) {
+      throw new NotFoundException(`Certificado #${id} não encontrado!`);
+    }
+    return certificado;
   }
 
-  update(id: number, updateCertificadoDto: UpdateCertificadoDto) {
-    return `This action updates a #${id} certificado`;
+  async update(id: number, updateCertificadoDto: UpdateCertificadoDto) {
+    await this.findOne(id)
+    return this.prisma.certificado
+      .update({
+        where: { id },
+        data: updateCertificadoDto
+      });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} certificado`;
+  async remove(id: number) {
+    await this.findOne(id)
+    return this.prisma.certificado
+      .delete({ where: { id }, });
   }
 }

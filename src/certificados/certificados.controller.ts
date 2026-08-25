@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, ParseIntPipe } from '@nestjs/common';
 import { CertificadosService } from './certificados.service';
 import { CreateCertificadoDto } from './dto/create-certificado.dto';
 import { UpdateCertificadoDto } from './dto/update-certificado.dto';
+import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 
 @Controller('certificados')
 export class CertificadosController {
@@ -13,22 +14,22 @@ export class CertificadosController {
   }
 
   @Get()
-  findAll() {
-    return this.certificadosService.findAll();
+  findAll(@Query() query: PaginationQueryDto) {
+    return this.certificadosService.findAll(query);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.certificadosService.findOne(+id);
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.certificadosService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCertificadoDto: UpdateCertificadoDto) {
-    return this.certificadosService.update(+id, updateCertificadoDto);
+  update(@Param('id', ParseIntPipe) id: number, @Body() updateCertificadoDto: UpdateCertificadoDto) {
+    return this.certificadosService.update(id, updateCertificadoDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.certificadosService.remove(+id);
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.certificadosService.remove(id);
   }
 }

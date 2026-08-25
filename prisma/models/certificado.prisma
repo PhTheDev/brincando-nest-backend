@@ -3,7 +3,7 @@ model Certificado {
   idUsuario         Int
   idCurso           Int
   codigoVerificacao String
-  dataEmissao       DateTime
+  dataEmissao       DateTime @default(now())
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 }
