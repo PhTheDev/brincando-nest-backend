@@ -2,7 +2,7 @@
 // Models por domínio ficam em prisma/models/.
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
 }
 
 generator client {
