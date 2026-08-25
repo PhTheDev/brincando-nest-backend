@@ -1,26 +1,61 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateTrilhaDto } from './dto/create-trilha.dto';
 import { UpdateTrilhaDto } from './dto/update-trilha.dto';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
+import { PaginatedResponse } from 'src/common/types/paginated-response';
+import { Trilha } from 'src/generated/prisma/client';
 
 @Injectable()
 export class TrilhasService {
+  constructor(private readonly prisma: PrismaService) {}
+
   create(createTrilhaDto: CreateTrilhaDto) {
-    return 'This action adds a new trilha';
+    return this.prisma.trilha.create({ data: createTrilhaDto });
   }
 
-  findAll() {
-    return `This action returns all trilhas`;
+  async findAll(query: PaginationQueryDto): Promise<PaginatedResponse<Trilha>> {
+    const { page, limit } = query;
+    const skip = (page - 1) * limit;
+
+    const [data, total] = await this.prisma.$transaction([
+      this.prisma.trilha.findMany({
+        skip,
+        take: limit,
+        orderBy: { id: 'asc' },
+      }),
+      this.prisma.trilha.count(),
+    ]);
+
+    return {
+      data,
+      meta: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit) || 0,
+      },
+    };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} trilha`;
+  async findOne(id: number) {
+    const trilha = await this.prisma.trilha.findUnique({ where: { id } });
+    if (!trilha) {
+      throw new NotFoundException(`Trilha #${id} não encontrada!`);
+    }
+    return trilha;
   }
 
-  update(id: number, updateTrilhaDto: UpdateTrilhaDto) {
-    return `This action updates a #${id} trilha`;
+  async update(id: number, updateTrilhaDto: UpdateTrilhaDto) {
+    await this.findOne(id);
+    return this.prisma.trilha.update({
+      where: { id },
+      data: updateTrilhaDto,
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} trilha`;
+  async remove(id: number) {
+    await this.findOne(id);
+    return this.prisma.trilha.delete({ where: { id } });
   }
 }

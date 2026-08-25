@@ -46,7 +46,7 @@ export class MatriculasService {
 
   async update(id: number, updateMatriculaDto: UpdateMatriculaDto) {
     await this.findOne(id)
-    return this.prisma.curso
+    return this.prisma.matricula
       .update({
         where: { id },
         data: updateMatriculaDto
@@ -55,7 +55,7 @@ export class MatriculasService {
 
   async remove(id: number) {
     await this.findOne(id)
-    return this.prisma.curso
+    return this.prisma.matricula
       .delete({where: { id }});
   }
 }

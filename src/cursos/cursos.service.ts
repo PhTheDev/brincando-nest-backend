@@ -55,6 +55,6 @@ export class CursosService {
 
   async remove(id: number) {
     await this.findOne(id)
-    return this.prisma.plano.delete({where: { id }})
+    return this.prisma.curso.delete({where: { id }})
   }
 }

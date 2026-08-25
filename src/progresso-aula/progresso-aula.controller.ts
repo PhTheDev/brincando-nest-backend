@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, ParseIntPipe } from '@nestjs/common';
 import { ProgressoAulaService } from './progresso-aula.service';
 import { CreateProgressoAulaDto } from './dto/create-progresso-aula.dto';
 import { UpdateProgressoAulaDto } from './dto/update-progresso-aula.dto';
+import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 
 @Controller('progresso-aula')
 export class ProgressoAulaController {
@@ -13,22 +14,32 @@ export class ProgressoAulaController {
   }
 
   @Get()
-  findAll() {
-    return this.progressoAulaService.findAll();
+  findAll(@Query() query: PaginationQueryDto) {
+    return this.progressoAulaService.findAll(query);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.progressoAulaService.findOne(+id);
+  @Get(':idUsuario/:idAula')
+  findOne(
+    @Param('idUsuario', ParseIntPipe) idUsuario: number,
+    @Param('idAula', ParseIntPipe) idAula: number,
+  ) {
+    return this.progressoAulaService.findOne(idUsuario, idAula);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateProgressoAulaDto: UpdateProgressoAulaDto) {
-    return this.progressoAulaService.update(+id, updateProgressoAulaDto);
+  @Patch(':idUsuario/:idAula')
+  update(
+    @Param('idUsuario', ParseIntPipe) idUsuario: number,
+    @Param('idAula', ParseIntPipe) idAula: number,
+    @Body() updateProgressoAulaDto: UpdateProgressoAulaDto,
+  ) {
+    return this.progressoAulaService.update(idUsuario, idAula, updateProgressoAulaDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.progressoAulaService.remove(+id);
+  @Delete(':idUsuario/:idAula')
+  remove(
+    @Param('idUsuario', ParseIntPipe) idUsuario: number,
+    @Param('idAula', ParseIntPipe) idAula: number,
+  ) {
+    return this.progressoAulaService.remove(idUsuario, idAula);
   }
 }

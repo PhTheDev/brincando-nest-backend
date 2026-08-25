@@ -1,5 +1,5 @@
 import { Type } from "class-transformer";
-import { IsDate, IsInt, Min } from "class-validator";
+import { IsDate, IsInt, IsOptional, Min } from "class-validator";
 
 export class CreateMatriculaDto {
     @Type(() => Number)
@@ -16,7 +16,8 @@ export class CreateMatriculaDto {
     @IsDate()
     dataMatricula!: Date;
 
-    @Type(()=> Date)
+    @IsOptional()
+    @Type(() => Date)
     @IsDate()
     dataConclusao?: Date;
 }

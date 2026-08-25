@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, ParseIntPipe } from '@nestjs/common';
 import { ModulosService } from './modulos.service';
 import { CreateModuloDto } from './dto/create-modulo.dto';
 import { UpdateModuloDto } from './dto/update-modulo.dto';
+import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 
 @Controller('modulos')
 export class ModulosController {
@@ -13,22 +14,22 @@ export class ModulosController {
   }
 
   @Get()
-  findAll() {
-    return this.modulosService.findAll();
+  findAll(@Query() query: PaginationQueryDto) {
+    return this.modulosService.findAll(query);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.modulosService.findOne(+id);
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.modulosService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateModuloDto: UpdateModuloDto) {
-    return this.modulosService.update(+id, updateModuloDto);
+  update(@Param('id', ParseIntPipe) id: number, @Body() updateModuloDto: UpdateModuloDto) {
+    return this.modulosService.update(id, updateModuloDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.modulosService.remove(+id);
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.modulosService.remove(id);
   }
 }

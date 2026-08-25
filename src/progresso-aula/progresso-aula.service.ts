@@ -1,26 +1,67 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateProgressoAulaDto } from './dto/create-progresso-aula.dto';
 import { UpdateProgressoAulaDto } from './dto/update-progresso-aula.dto';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
+import { PaginatedResponse } from 'src/common/types/paginated-response';
+import { ProgressoAula } from 'src/generated/prisma/client';
 
 @Injectable()
 export class ProgressoAulaService {
+  constructor(private readonly prisma: PrismaService) {}
+
   create(createProgressoAulaDto: CreateProgressoAulaDto) {
-    return 'This action adds a new progressoAula';
+    return this.prisma.progressoAula.create({ data: createProgressoAulaDto });
   }
 
-  findAll() {
-    return `This action returns all progressoAula`;
+  async findAll(query: PaginationQueryDto): Promise<PaginatedResponse<ProgressoAula>> {
+    const { page, limit } = query;
+    const skip = (page - 1) * limit;
+
+    const [data, total] = await this.prisma.$transaction([
+      this.prisma.progressoAula.findMany({
+        skip,
+        take: limit,
+        orderBy: [{ idUsuario: 'asc' }, { idAula: 'asc' }],
+      }),
+      this.prisma.progressoAula.count(),
+    ]);
+
+    return {
+      data,
+      meta: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit) || 0,
+      },
+    };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} progressoAula`;
+  async findOne(idUsuario: number, idAula: number) {
+    const progresso = await this.prisma.progressoAula.findUnique({
+      where: { idUsuario_idAula: { idUsuario, idAula } },
+    });
+    if (!progresso) {
+      throw new NotFoundException(
+        `Progresso do usuario #${idUsuario} na aula #${idAula} não encontrado!`,
+      );
+    }
+    return progresso;
   }
 
-  update(id: number, updateProgressoAulaDto: UpdateProgressoAulaDto) {
-    return `This action updates a #${id} progressoAula`;
+  async update(idUsuario: number, idAula: number, updateProgressoAulaDto: UpdateProgressoAulaDto) {
+    await this.findOne(idUsuario, idAula);
+    return this.prisma.progressoAula.update({
+      where: { idUsuario_idAula: { idUsuario, idAula } },
+      data: updateProgressoAulaDto,
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} progressoAula`;
+  async remove(idUsuario: number, idAula: number) {
+    await this.findOne(idUsuario, idAula);
+    return this.prisma.progressoAula.delete({
+      where: { idUsuario_idAula: { idUsuario, idAula } },
+    });
   }
 }

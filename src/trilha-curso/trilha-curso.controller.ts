@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, ParseIntPipe } from '@nestjs/common';
 import { TrilhaCursoService } from './trilha-curso.service';
 import { CreateTrilhaCursoDto } from './dto/create-trilha-curso.dto';
 import { UpdateTrilhaCursoDto } from './dto/update-trilha-curso.dto';
+import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 
 @Controller('trilha-curso')
 export class TrilhaCursoController {
@@ -13,22 +14,32 @@ export class TrilhaCursoController {
   }
 
   @Get()
-  findAll() {
-    return this.trilhaCursoService.findAll();
+  findAll(@Query() query: PaginationQueryDto) {
+    return this.trilhaCursoService.findAll(query);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.trilhaCursoService.findOne(+id);
+  @Get(':idTrilha/:idCurso')
+  findOne(
+    @Param('idTrilha', ParseIntPipe) idTrilha: number,
+    @Param('idCurso', ParseIntPipe) idCurso: number,
+  ) {
+    return this.trilhaCursoService.findOne(idTrilha, idCurso);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateTrilhaCursoDto: UpdateTrilhaCursoDto) {
-    return this.trilhaCursoService.update(+id, updateTrilhaCursoDto);
+  @Patch(':idTrilha/:idCurso')
+  update(
+    @Param('idTrilha', ParseIntPipe) idTrilha: number,
+    @Param('idCurso', ParseIntPipe) idCurso: number,
+    @Body() updateTrilhaCursoDto: UpdateTrilhaCursoDto,
+  ) {
+    return this.trilhaCursoService.update(idTrilha, idCurso, updateTrilhaCursoDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.trilhaCursoService.remove(+id);
+  @Delete(':idTrilha/:idCurso')
+  remove(
+    @Param('idTrilha', ParseIntPipe) idTrilha: number,
+    @Param('idCurso', ParseIntPipe) idCurso: number,
+  ) {
+    return this.trilhaCursoService.remove(idTrilha, idCurso);
   }
 }

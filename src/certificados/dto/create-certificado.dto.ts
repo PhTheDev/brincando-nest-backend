@@ -1,5 +1,5 @@
 import { Type } from "class-transformer";
-import { IsInt, IsString, Min } from "class-validator";
+import { IsInt, IsString, Min, MinLength } from "class-validator";
 
 export class CreateCertificadoDto {
     @Type(() => Number)
@@ -13,6 +13,6 @@ export class CreateCertificadoDto {
     idCurso!: number
 
     @IsString()
-    @Min(1)
+    @MinLength(1)
     codigoVerificacao!: string;
 }

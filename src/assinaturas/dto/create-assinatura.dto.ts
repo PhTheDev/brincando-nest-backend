@@ -1,5 +1,5 @@
 import { Type } from "class-transformer";
-import { IsDate, IsInt, Min } from "class-validator";
+import { IsDate, IsInt, IsOptional, Min } from "class-validator";
 
 export class CreateAssinaturaDto {
     @Type(() => Number)
@@ -16,6 +16,7 @@ export class CreateAssinaturaDto {
     @IsDate()
     dataInicio!: Date;
 
+    @IsOptional()
     @Type(() => Date)
     @IsDate()
     dataFim?: Date;
