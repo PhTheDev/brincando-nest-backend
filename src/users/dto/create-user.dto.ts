@@ -2,7 +2,6 @@ import {
   IsEmail,
   IsOptional,
   IsString,
-  IsStrongPassword,
   MinLength,
 } from 'class-validator';
 
@@ -16,6 +15,7 @@ export class CreateUserDto {
   @MinLength(1)
   nome?: string;
 
-  @IsStrongPassword()
+  @IsString()
+  @MinLength(3)
   senha!: string;
 }

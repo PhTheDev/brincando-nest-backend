@@ -16,12 +16,14 @@ import { AulasModule } from './aulas/aulas.module';
 import { ModulosModule } from './modulos/modulos.module';
 import { CursosModule } from './cursos/cursos.module';
 import { PlanosModule } from './planos/planos.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     PrismaModule,
     UsersModule,
+    AuthModule,
     CategoriasModule,
     PlanosModule,
     CursosModule,

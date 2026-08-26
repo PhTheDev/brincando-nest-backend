@@ -2,6 +2,7 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import { PaginatedResponse } from '../common/types/paginated-response';
@@ -55,6 +56,18 @@ export class UsersService {
     return user;
   }
 
+  findByEmail(email: string) {
+    return this.prisma.usuario.findUnique({ where: { email } });
+  }
+
+  async login(email: string, senha: string) {
+    const user = await this.findByEmail(email);
+    if (!user || user.senha !== senha) {
+      throw new UnauthorizedException('E-mail ou senha incorretos.');
+    }
+    return user;
+  }
+
   async update(id: number, dto: UpdateUserDto) {
     await this.findOne(id);
     return this.prisma.usuario
@@ -78,7 +91,7 @@ export class UsersService {
       error instanceof Prisma.PrismaClientKnownRequestError &&
       error.code === 'P2002'
     ) {
-      throw new ConflictException('Email already in use');
+      throw new ConflictException('E-mail já cadastrado.');
     }
   }
 }

@@ -1,4 +1,4 @@
-import { IsEmail, IsOptional, IsString, IsStrongPassword, MinLength } from 'class-validator';
+import { IsEmail, IsOptional, IsString, MinLength } from 'class-validator';
 
 /** Equivalente a um Serializer parcial (PATCH) do Django. */
 export class UpdateUserDto {
@@ -11,7 +11,7 @@ export class UpdateUserDto {
   nome?: string;
 
   @IsString()
-  @IsStrongPassword()
   @IsOptional()
-  senha!: string;
+  @MinLength(3)
+  senha?: string;
 }
